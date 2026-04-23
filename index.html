@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BW Parfum Imports | Luxury Control</title>
+    <style>
+        :root { --gold: #d4af37; --black: #0a0a0a; --gray: #1a1a1a; --text: #e0e0e0; --red: #ff4d4d; --green: #00ff00; }
+        body { background: var(--black); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
+        
+        .header-loja {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            background: radial-gradient(circle, #1a1a1a 0%, #0a0a0a 100%);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .logo-loja {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--gold);
+            margin-bottom: 15px;
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+        .nome-loja {
+            color: var(--gold);
+            font-size: 2em;
+            font-weight: 700;
+            letter-spacing: 4px;
+            margin: 0;
+            text-align: center;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        }
+        .subtitulo-loja {
+            color: #888;
+            font-size: 0.8em;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        nav { background: var(--gray); display: flex; overflow-x: auto; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 100; justify-content: center; }
+        nav button { background: none; border: none; color: white; padding: 15px; cursor: pointer; font-weight: bold; min-width: 110px; transition: 0.3s; font-size: 12px; }
+        nav button.active { color: var(--gold); border-bottom: 3px solid var(--gold); background: rgba(212, 175, 55, 0.1); }
+        
+        .container { padding: 20px; max-width: 800px; margin: auto; }
+        .aba { display: none; }
+        .aba.active { display: block; }
+        .card { background: var(--gray); padding: 20px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { color: var(--gold); text-align: center; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
+        label { display: block; margin-top: 15px; color: var(--gold); font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; background: #222; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        
+        .btn-save { background: linear-gradient(45deg, #d4af37, #f9e29c); color: black; border: none; padding: 15px; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+        .btn-save:hover { opacity: 0.9; }
+        .btn-delete { color: var(--red); border: 1px solid var(--red); background: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-pago { background: var(--green); color: black; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-qtd { background: #333; color: white; border: 1px solid var(--gold); padding: 5px 12px; border-radius: 4px; cursor: pointer; margin: 0 2px; }
+        
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #333; }
+        
+        .grid-relatorio { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        
+        .stat-card { 
+            background: #222; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            border-top: 3px solid var(--gold); 
+        }
+        .stat-card h3 { 
+            font-size: 11px; 
+            color: #aaa; 
+            margin: 0 0 8px 0; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        .stat-card p { 
+            font-size: 1.3em; 
+            color: var(--gold); 
+            font-weight: bold; 
+            margin: 0; 
+        }
+        .stat-card.verde p  { color: #00ff00; }
+        .stat-card.vermelho p { color: #ff4d4d; }
+        .stat-card.azul p   { color: #4da6ff; }
+        .stat-card.roxo p   { color: #bf7fff; }
+
+        .busca-container { margin-bottom: 15px; position: relative; }
+        .busca-container input { border-color: var(--gold); padding-left: 35px; }
+        .busca-container::before { content: '🔍'; position: absolute; left: 12px; top: 15px; font-size: 14px; }
+
+        .tag-pago    { background: #1a3a1a; color: #00ff00; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        .tag-fiado   { background: #3a3a1a; color: var(--gold); padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        .tag-cartao  { background: #1a2a3a; color: #4da6ff; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        .tag-dinheiro { background: #1a2a1a; color: #80ff80; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+
+        .venda-item {
+            background: #222;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--gold);
+        }
+
+        .divider { border: none; border-top: 1px solid #333; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<header class="header-loja">
+    <img src="logo.png.jpeg" alt="BW Parfum Imports" class="logo-loja"
+         onerror="this.src='https://cdn-icons-png.flaticon.com/512/3002/3002655.png'">
+    <h1 class="nome-loja">BW PARFUM IMPORTS</h1>
+    <span class="subtitulo-loja">LUXURY CONTROL</span>
+</header>
+
+<nav>
+    <button onclick="abrirAba('cadastro')"   id="nav-cadastro"   class="active">📦 CADASTRO</button>
+    <button onclick="abrirAba('perfumes')"   id="nav-perfumes">💎 ESTOQUE</button>
+    <button onclick="abrirAba('vendas')"     id="nav-vendas">🛒 VENDER</button>
+    <button onclick="abrirAba('vendidos')"   id="nav-vendidos">📋 HISTÓRICO</button>
+    <button onclick="abrirAba('fiado')"      id="nav-fiado">⚠️ FIADO</button>
+    <button onclick="abrirAba('clientes')"   id="nav-clientes">👥 CLIENTES</button>
+    <button onclick="abrirAba('relatorios')" id="nav-relatorios">📊 RELATÓRIOS</button>
+</nav>
+
+<div class="container">
+
+    <!-- ===================== CADASTRO ===================== -->
+    <section id="cadastro" class="aba active">
+        <div class="card">
+            <h2>Cadastrar Perfume</h2>
+
+            <label>Nome do Perfume</label>
+            <input type="text" id="p-nome" placeholder="Ex: POLO BLACK 125ML">
+
+            <label>Quantidade em Estoque</label>
+            <input type="number" id="p-qtd" value="1">
+
+            <label>Custo Unitário (R$)</label>
+            <input type="number" id="p-custo" placeholder="0.00" oninput="window.calcularPreco()">
+
+            <label>Frete Unitário (R$)</label>
+            <input type="number" id="p-frete" value="30" oninput="window.calcularPreco()">
+
+            <label>Deslocamento (R$)</label>
+            <input type="number" id="p-deslocamento" value="15" oninput="window.calcularPreco()">
+
+            <label>Margem de Lucro (%)</label>
+            <input type="number" id="p-lucro" value="40" oninput="window.calcularPreco()">
+
+            <div class="card" style="border-color:var(--gold); margin-top:15px; background:rgba(212,175,55,0.05);">
+                <p style="margin:5px 0;">
+                    💳 Valor Cartão (+12%): 
+                    <strong id="res-cartao" style="color:var(--gold);">R$ 0,00</strong>
+                </p>
+                <p style="margin:5px 0;">
+                    💚 Valor Pix (+2%): 
+                    <strong id="res-pix" style="color:#00ff00;">R$ 0,00</strong>
+                </p>
+            </div>
+
+            <div id="res-lucro-msg" style="
+                margin-top: 12px;
+                padding: 12px 16px;
+                background: rgba(0,255,0,0.07);
+                border: 1px solid #00ff00;
+                border-radius: 8px;
+                display: none;">
+                <div style="color:#00ff00; font-size:12px; font-weight:bold; 
+                    text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">
+                    💰 Seu Lucro por Unidade Vendida
+                </div>
+                <div id="res-lucro-pix" 
+                    style="color:white; font-size:1.3em; font-weight:bold;">
+                </div>
+                <div id="res-lucro-cartao" 
+                    style="color:#aaa; font-size:11px; margin-top:4px;">
+                </div>
+                <div id="res-lucro-dica" 
+                    style="color:#888; font-size:10px; margin-top:8px; 
+                    border-top:1px solid #1a3a1a; padding-top:8px;">
+                </div>
+            </div>
+
+            <button class="btn-save" onclick="window.salvarProduto()">
+                💾 SALVAR NO ESTOQUE
+            </button>
+        </div>
+    </section>
+
+    <!-- ===================== ESTOQUE ===================== -->
+    <section id="perfumes" class="aba">
+        <h2>Produtos em Estoque</h2>
+
+        <div style="margin-bottom:15px;">
+            <input 
+                type="text" 
+                id="busca-estoque" 
+                placeholder="🔍 Buscar perfume pelo nome..."
+                oninput="window.filtrarEstoque()"
+                style="width:100%; padding:12px; border-radius:8px; 
+                border:1px solid var(--gold); background:#1a1a1a; 
+                color:white; font-size:14px; box-sizing:border-box;">
+        </div>
+
+        <div id="lista-estoque">
+            <div style="text-align:center; color:#888; padding:30px;">
+                Carregando estoque...
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== VENDAS ===================== -->
+    <section id="vendas" class="aba">
+        <div class="card">
+            <h2>Lançar Nova Venda</h2>
+
+            <label>📅 Data da Venda</label>
+            <input type="date" id="v-data"
+                style="width:100%; padding:12px; background:#222;
+                border:1px solid #444; color:white; border-radius:5px;
+                box-sizing:border-box; font-size:16px; margin-bottom:10px;">
+
+            <label>👤 Cliente</label>
+            <input type="text" id="v-cliente"
+                list="lista-sugestao-clientes"
+                placeholder="Nome do cliente"
+                style="width:100%; padding:12px; background:#222;
+                border:1px solid #444; color:white; border-radius:5px;
+                box-sizing:border-box; font-size:16px; margin-bottom:10px;">
+            <datalist id="lista-sugestao-clientes"></datalist>
+
+            <label>📱 WhatsApp</label>
+            <input type="text" id="v-contato"
+                placeholder="(99) 99999-9999"
+                style="width:100%; padding:12px; background:#222;
+                border:1px solid #444; color:white; border-radius:5px;
+                box-sizing:border-box; font-size:16px; margin-bottom:10px;">
+
+            <label>📍 Endereço</label>
+            <input type="text" id="v-endereco"
+                placeholder="Rua, número, bairro"
+                style="width:100%; padding:12px; background:#222;
+                border:1px solid #444; color:white; border-radius:5px;
+                box-sizing:border-box; font-size:16px; margin-bottom:10px;">
+
+            <label>💳 Forma de Pagamento</label>
+            <select id="v-pagamento"
+                onchange="window.toggleTaxaCartao(this.value)"
+                style="width:100%; padding:12px; background:#222;
+                border:1px solid #444; color:white; border-radius:5px;
+                box-sizing:border-box; font-size:16px; margin-bottom:10px;">
+                <option value="PIX">💚 PIX</option>
+                <option value="Dinheiro">💵 Dinheiro</option>
+                <option value="Cartão">💳 Cartão</option>
+                <option value="Fiado">⚠️ Fiado</option>
+            </select>
+
+            <div style="display:flex; align-items:center; gap:10px;
+                margin:10px 0; padding:10px 12px;
+                background:#1a2a1a; border-radius:8px;
+                border:1px solid #333;">
+                <label style="display:flex; align-items:center;
+                    gap:10px; cursor:pointer; width:100%; margin:0;">
+                    <input type="checkbox" id="v-retirada"
+                        style="width:18px; height:18px; cursor:pointer;
+                        accent-color: var(--gold);"
+                        onchange="window.atualizarResumoPagamento()">
+                    <div>
+                        <div style="color:var(--gold); font-weight:bold; font-size:13px;">
+                            🏠 Cliente retirou pessoalmente
+                        </div>
+                        <div style="color:#888; font-size:10px; margin-top:2px;">
+                            Marcado = frete vira lucro seu (sem custo de entrega)
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <div id="div-fiado" style="display:none; margin-bottom:10px;
+                background:rgba(212,175,55,0.05); padding:15px;
+                border-radius:8px; border:1px dashed var(--gold);">
+                <label style="color:var(--gold); font-size:11px;
+                    font-weight:bold; text-transform:uppercase;">
+                    📋 Número de Parcelas
+                </label>
+                <input type="number" id="v-parcelas"
+                    value="1" min="1" max="24"
+                    onchange="window.gerarCamposDataParcelas()"
+                    style="width:100%; padding:12px; margin-top:5px;
+                    background:#1a1a1a; border:1px solid var(--gold);
+                    color:white; border-radius:8px;
+                    box-sizing:border-box; font-size:16px;">
+                <div id="campos-datas-parcelas"></div>
+            </div>
+
+            <hr style="border-color:#333; margin:15px 0;">
+
+            <div style="background:#111; border:1px dashed #444;
+                border-radius:8px; padding:15px; margin-bottom:12px;">
+
+                <p style="color:var(--gold); font-size:12px;
+                    font-weight:bold; text-transform:uppercase;
+                    margin:0 0 12px 0;">
+                    🛒 Adicionar Perfume
+                </p>
+
+                <label style="color:#aaa; font-size:11px;
+                    text-transform:uppercase;">🌸 Perfume</label>
+                <input type="text" id="v-perfume"
+                    list="lista-perfumes-venda"
+                    placeholder="Digite ou selecione o perfume..."
+                    onchange="window.autoPreencherVenda()"
+                    oninput="window.autoPreencherVenda()"
+                    style="width:100%; padding:12px; margin:5px 0 10px;
+                    background:#1a1a1a; border:1px solid #444;
+                    color:white; border-radius:8px;
+                    box-sizing:border-box; font-size:16px;">
+                <datalist id="lista-perfumes-venda"></datalist>
+
+                <label style="color:#aaa; font-size:11px;
+                    text-transform:uppercase;">🔢 Quantidade</label>
+                <input type="number" id="v-qtd-item"
+                    value="1" min="1"
+                    style="width:100%; padding:12px; margin:5px 0 10px;
+                    background:#1a1a1a; border:1px solid #444;
+                    color:white; border-radius:8px;
+                    box-sizing:border-box; font-size:16px;">
+
+                <label style="color:#aaa; font-size:11px;
+                    text-transform:uppercase;">💰 Valor Unitário (R$)</label>
+                <input type="number" id="v-valor-venda"
+                    placeholder="Preenchido automaticamente..."
+                    step="0.01"
+                    style="width:100%; padding:12px; margin:5px 0 12px;
+                    background:#1a1a1a; border:1px solid var(--gold);
+                    color:white; border-radius:8px;
+                    box-sizing:border-box; font-size:16px;">
+
+                <button onclick="window.adicionarItemCarrinho()"
+                    style="width:100%; padding:14px;
+                    background:linear-gradient(45deg,#1a3a2a,#2a5a3a);
+                    color:#00ff00; border:1px solid #00ff00;
+                    border-radius:8px; font-weight:bold;
+                    font-size:14px; cursor:pointer;">
+                    ➕ ADICIONAR AO CARRINHO
+                </button>
+            </div>
+
+            <div id="lista-carrinho"></div>
+
+            <div id="div-total-carrinho"
+                style="display:none; margin:12px 0; padding:14px;
+                background:#1a2a1a; border:1px solid var(--gold);
+                border-radius:8px;">
+
+                <div style="display:flex; justify-content:space-between;
+                    align-items:center; margin-bottom:8px;">
+                    <span style="color:#aaa; font-size:12px;
+                        text-transform:uppercase; letter-spacing:1px;">
+                        💰 Total da Venda:
+                    </span>
+                    <span id="total-carrinho-valor"
+                        style="color:var(--gold); font-size:1.5em; font-weight:bold;">
+                        R$ 0,00
+                    </span>
+                </div>
+
+                <div id="resumo-pix" style="display:none;
+                    border-top:1px solid #333; padding-top:8px; margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between;
+                        font-size:12px; margin-bottom:4px;">
+                        <span style="color:#00ff00;">💚 Cliente paga (PIX/Dinheiro):</span>
+                        <span id="res-val-pix"
+                            style="color:#00ff00; font-weight:bold;">R$ 0,00</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                        font-size:13px; border-top:1px solid #333;
+                        padding-top:6px; margin-top:4px;">
+                        <span style="color:#00ff00; font-weight:bold;">✅ Você recebe:</span>
+                        <span id="res-liq-pix"
+                            style="color:#00ff00; font-size:1.1em; font-weight:bold;">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div id="resumo-cartao" style="display:none;
+                    border-top:1px solid #333; padding-top:8px; margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between;
+                        font-size:12px; margin-bottom:4px;">
+                        <span style="color:white;">💳 Cliente paga:</span>
+                        <span id="res-val-cartao"
+                            style="color:white; font-weight:bold;">R$ 0,00</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                        font-size:12px; margin-bottom:4px;">
+                        <span style="color:#ff4d4d;">
+                            📉 Taxa maquininha
+                            (<span id="res-perc-cartao">12</span>%):
+                        </span>
+                        <span id="res-taxa-cartao"
+                            style="color:#ff4d4d; font-weight:bold;">-R$ 0,00</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                        font-size:13px; border-top:1px solid #333;
+                        padding-top:6px; margin-top:4px;">
+                        <span style="color:var(--gold); font-weight:bold;">✅ Você recebe:</span>
+                        <span id="res-liq-cartao"
+                            style="color:var(--gold); font-size:1.1em; font-weight:bold;">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div id="resumo-fiado" style="display:none;
+                    border-top:1px solid #333; padding-top:8px; margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between;
+                        font-size:12px; margin-bottom:6px;">
+                        <span style="color:var(--gold);">⚠️ Total fiado:</span>
+                        <span id="res-val-fiado"
+                            style="color:var(--gold); font-weight:bold;">R$ 0,00</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                        font-size:12px; margin-bottom:6px;">
+                        <span style="color:#aaa;">📋 Nº de parcelas:</span>
+                        <span id="res-qtd-fiado"
+                            style="color:#aaa; font-weight:bold;">1x</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                        font-size:13px; border-top:1px solid #333;
+                        padding-top:6px; margin-top:4px;">
+                        <span style="color:var(--gold); font-weight:bold;">📅 Valor por parcela:</span>
+                        <span id="res-parc-fiado"
+                            style="color:var(--gold); font-size:1.1em; font-weight:bold;">R$ 0,00</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="btn-save" onclick="window.salvarVenda()"
+                style="margin-top:8px;">
+                ✅ FINALIZAR VENDA
+            </button>
+
+        </div>
+    </section>
+
+    <!-- ===================== HISTÓRICO ===================== -->
+    <section id="vendidos" class="aba">
+        <h2>Histórico de Vendas</h2>
+        <div class="card">
+            <div class="busca-container">
+                <input type="text" id="busca-historico"
+                    placeholder="Pesquisar perfume ou cliente..."
+                    oninput="window.filtrarHistorico()">
+            </div>
+            <div class="grid-relatorio">
+                <div>
+                    <label>Desde</label>
+                    <input type="date" id="filtro-hist-ini"
+                        onchange="window.carregarVendidos()">
+                </div>
+                <div>
+                    <label>Até</label>
+                    <input type="date" id="filtro-hist-fim"
+                        onchange="window.carregarVendidos()">
+                </div>
+            </div>
+        </div>
+        <div id="lista-vendidos">
+            <div style="text-align:center; color:#888; padding:30px;">
+                Carregando histórico...
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== FIADO ===================== -->
+    <section id="fiado" class="aba">
+        <h2>Monitoramento de Fiados</h2>
+        <div id="lista-fiados">
+            <div style="text-align:center; color:#888; padding:30px;">
+                Carregando fiados...
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== CLIENTES ===================== -->
+    <section id="clientes" class="aba">
+        <h2>Banco de Clientes</h2>
+        <div id="lista-clientes">
+            <div style="text-align:center; color:#888; padding:30px;">
+                Carregando clientes...
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== RELATÓRIOS ===================== -->
+    <section id="relatorios" class="aba">
+        <h2>Painel Financeiro</h2>
+
+        <div style="
+            background: linear-gradient(135deg, #1a1a2a, #2a1a3a);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            text-align: center;">
+            <div style="font-size: 2em; margin-bottom: 4px;">💎</div>
+            <div style="color: var(--gold); font-size: 11px;
+                text-transform: uppercase; letter-spacing: 2px;
+                margin-bottom: 8px;">
+                TOTAL GERAL VENDIDO
+            </div>
+            <div id="rel-total-geral"
+                style="color: var(--gold); font-size: 2em;
+                font-weight: bold; letter-spacing: 1px;">
+                R$ 0,00
+            </div>
+            <div style="color: #888; font-size: 10px; margin-top: 6px;">
+                Pix + Cartão + Dinheiro + Fiado Pago + Fiado Pendente
+            </div>
+        </div>
+
+        <div style="
+            background: linear-gradient(135deg, #0a2a0a, #1a3a1a);
+            border: 2px solid #00ff00;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            text-align: center;">
+            <div style="font-size: 2em; margin-bottom: 4px;">📈</div>
+            <div style="color: #00ff00; font-size: 11px;
+                text-transform: uppercase; letter-spacing: 2px;
+                margin-bottom: 8px;">
+                LUCRO ESTIMADO
+            </div>
+            <div id="rel-lucro"
+                style="color: #00ff00; font-size: 2em;
+                font-weight: bold; letter-spacing: 1px;">
+                R$ 0,00
+            </div>
+            <div style="color: #888; font-size: 10px; margin-top: 6px;">
+                💡 Vendas pagas − custo − frete (se entregou) − deslocamento
+            </div>
+            <div style="margin-top:12px; text-align:left;
+                border-top:1px solid #1a3a1a; padding-top:10px;">
+                <div style="display:flex; justify-content:space-between;
+                    font-size:11px; padding:3px 0;">
+                    <span style="color:#aaa;">💰 Total recebido:</span>
+                    <span id="rel-lucro-receita" style="color:white;">R$ 0,00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;
+                    font-size:11px; padding:3px 0;">
+                    <span style="color:#aaa;">🛍️ Custo dos produtos:</span>
+                    <span id="rel-lucro-custo" style="color:#ff4d4d;">R$ 0,00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;
+                    font-size:11px; padding:3px 0;">
+                    <span style="color:#aaa;">🚚 Frete (entregas):</span>
+                    <span id="rel-lucro-frete" style="color:#ff4d4d;">R$ 0,00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;
+                    font-size:11px; padding:3px 0;">
+                    <span style="color:#aaa;">🗺️ Deslocamento:</span>
+                    <span id="rel-lucro-desloc" style="color:#ff4d4d;">R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <p style="color:#aaa; font-size:12px; margin:0 0 10px 0; text-align:center;">
+                📅 Mostrando o mês atual por padrão — altere para filtrar outro período
+            </p>
+            <div class="grid-relatorio">
+                <div>
+                    <label>Início</label>
+                    <input type="date" id="rel-inicio" onchange="window.gerarRelatorio()">
+                </div>
+                <div>
+                    <label>Fim</label>
+                    <input type="date" id="rel-fim" onchange="window.gerarRelatorio()">
+                </div>
+            </div>
+            <button class="btn-save" style="margin-top:10px;" onclick="window.gerarRelatorio()">
+                🔍 FILTRAR PERÍODO
+            </button>
+        </div>
+
+        <div class="grid-relatorio">
+            <div class="stat-card">
+                <h3>💰 Faturamento</h3>
+                <p id="rel-total">R$ 0,00</p>
+            </div>
+            <div class="stat-card">
+                <h3>🛍️ Nº de Vendas</h3>
+                <p id="rel-qtd">0</p>
+            </div>
+            <div class="stat-card verde">
+                <h3>💚 Total PIX</h3>
+                <p id="rel-pix">R$ 0,00</p>
+            </div>
+            <div class="stat-card azul">
+                <h3>💳 Cartão (Líquido)</h3>
+                <p id="rel-cartao">R$ 0,00</p>
+            </div>
+            <div class="stat-card roxo">
+                <h3>💵 Total Dinheiro</h3>
+                <p id="rel-dinheiro">R$ 0,00</p>
+            </div>
+            <div class="stat-card">
+                <h3>📋 Fiado Pago</h3>
+                <p id="rel-fiado">R$ 0,00</p>
+            </div>
+            <div class="stat-card vermelho">
+                <h3>💳 Taxa Operadora</h3>
+                <p id="rel-taxa-cartao">R$ 0,00</p>
+            </div>
+            <div class="stat-card azul">
+                <h3>💳 Cartão Bruto</h3>
+                <p id="rel-cartao-bruto">R$ 0,00</p>
+            </div>
+        </div>
+
+        <div class="card" style="border-color:#ff4d4d; text-align:center; margin-bottom:15px;">
+            <h3 style="color:#ff4d4d; margin:0 0 5px 0; font-size:12px;">
+                ⚠️ TOTAL FIADO PENDENTE (EM ABERTO)
+            </h3>
+            <p id="rel-pendente"
+                style="font-size:1.6em; color:#ff4d4d; font-weight:bold; margin:0;">
+                R$ 0,00
+            </p>
+        </div>
+
+        <div class="card" style="text-align:center; margin-bottom:15px;">
+            <h3 style="color:var(--gold); margin:0 0 5px 0; font-size:12px;">
+                🏆 MAIS VENDIDO NO PERÍODO
+            </h3>
+            <p id="rel-mais-vendido"
+               style="font-size:1.1em; color:var(--gold); font-weight:bold; margin:0;">
+                —
+            </p>
+        </div>
+
+        <h3 style="color:var(--gold); margin:20px 0 10px;
+            text-transform:uppercase; letter-spacing:2px; font-size:14px;">
+            📋 Vendas do Período
+        </h3>
+        <div id="lista-rel-vendas">
+            <div style="text-align:center; color:#888; padding:20px;">
+                Selecione um período para ver as vendas
+            </div>
+        </div>
+
+    </section>
+</div>
+
+<script type="module" src="./app.js"></script>
+<script>
+    function abrirAba(id) {
+        document.querySelectorAll('.aba').forEach(a => a.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+
+        document.getElementById(id).classList.add('active');
+        document.getElementById('nav-' + id).classList.add('active');
+
+        if (id === 'perfumes')   window.carregarEstoque();
+        if (id === 'vendidos')   window.carregarVendidos();
+        if (id === 'fiado')      window.carregarFiados();
+        if (id === 'clientes')   window.carregarClientes();
+        if (id === 'relatorios') window.gerarRelatorio();
+    }
+
+    document.getElementById('v-data').valueAsDate = new Date();
+</script>
+
+<!-- ✅ MODAL EDIÇÃO DE PRODUTO -->
+<div id="modal-editar-produto" style="
+    display:none; position:fixed; top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.85);
+    z-index:9999; overflow-y:auto;">
+    <div style="
+        background:#1a1a1a;
+        border:1px solid var(--gold);
+        border-radius:12px;
+        max-width:500px;
+        margin:40px auto;
+        padding:24px;
+        box-sizing:border-box;">
+
+        <h3 style="color:var(--gold); text-align:center;
+            text-transform:uppercase; letter-spacing:2px;
+            margin-top:0; border-bottom:1px solid #333;
+            padding-bottom:10px;">
+            ✏️ Editar Perfume
+        </h3>
+
+        <input type="hidden" id="edit-prod-id">
+
+        <label style="color:var(--gold); font-size:11px; font-weight:bold;
+            text-transform:uppercase; display:block; margin-top:15px;">
+            Nome do Perfume
+        </label>
+        <input type="text" id="edit-prod-nome"
+            style="width:100%; padding:12px; background:#222;
+            border:1px solid #444; color:white; border-radius:5px;
+            box-sizing:border-box; font-size:16px; margin-top:5px;">
+
+        <label style="color:var(--gold); font-size:11px; font-weight:bold;
+            text-transform:uppercase; display:block; margin-top:15px;">
+            Quantidade em Estoque
+        </label>
+        <input type="number" id="edit-prod-qtd"
+            style="width:100%; padding:12px; background:#222;
+            border:1px solid #444; color:white; border-radius:5px;
+            box-sizing:border-box; font-size:16px; margin-top:5px;">
+
+        <label style="color:var(--gold); font-size:11px; font-weight:bold;
+            text-transform:uppercase; display:block; margin-top:15px;">
+            Custo Unitário (R$)
+        </label>
+        <input type="number" id="edit-prod-custo"
+            oninput="window.recalcularEdicaoProduto()"
+            style="width:100%; padding:12px; background:#222;
+            border:1px solid #444; color:white; border-radius:5px;
+            box-sizing:border-box; font-size:16px; margin-top:5px;">
+
+        <label style="color:var(--gold); font-size:11px; font-weight:bold;
+            text-transform:uppercase; display:block; margin-top:15px;">
+            Frete Unitário (R$)
+        </label>
+        <input type="number" id="edit-prod-frete"
+            oninput="window.recalcularEdicaoProduto()"
+            style="width:100%; padding:12px; background:#222;
+            border:1px solid #444; color:white; border-radius:5px;
+            box-sizing:border-box; font-size:16px; margin-top:5px;">
+
+        <label style="color:var(--gold); font-size:11px; font-weight:bold;
+            text-transform:uppercase; display:block; margin-top:15px;">
+            Deslocamento (R$)
+        </label>
+        <input type="number" id="edit-prod-desloc"
+            oninput="window.recalcularEdicaoProduto()"
+            style="width:100%; padding:12px; background:#222;
+            border:1px solid #444; color:white; border-radius:5px;
+            box-sizing:border-box; font-size:16px; margin-top:5px;">
+
+        <label style="color:var(--gold); font-size:11px; font-weight:bold;
+            text-transform:uppercase; display:block; margin-top:15px;">
+            Margem de Lucro (%)
+        </label>
+        <input type="number" id="edit-prod-margem"
+            oninput="window.recalcularEdicaoProduto()"
+            style="width:100%; padding:12px; background:#222;
+            border:1px solid #444; color:white; border-radius:5px;
+            box-sizing:border-box; font-size:16px; margin-top:5px;">
+
+        <div style="background:rgba(212,175,55,0.05);
+            border:1px solid var(--gold); border-radius:8px;
+            padding:12px; margin-top:15px;">
+            <p style="margin:5px 0; font-size:13px; color:white;">
+                💳 Cartão:
+                <strong id="edit-res-cartao" style="color:var(--gold);">R$ 0,00</strong>
+            </p>
+            <p style="margin:5px 0; font-size:13px; color:white;">
+                💚 PIX/Dinheiro:
+                <strong id="edit-res-pix" style="color:#00ff00;">R$ 0,00</strong>
+            </p>
+            <p style="margin:5px 0; font-size:13px; color:white;">
+                💰 Lucro estimado:
+                <strong id="edit-res-lucro" style="color:#00ff00;">R$ 0,00</strong>
+            </p>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="window.fecharModalEditarProduto()"
+                style="flex:1; padding:14px; background:none;
+                border:1px solid #555; color:#aaa;
+                border-radius:8px; cursor:pointer; font-weight:bold;">
+                ❌ CANCELAR
+            </button>
+            <button onclick="window.salvarEdicaoProduto()"
+                style="flex:2; padding:14px;
+                background:linear-gradient(45deg,#d4af37,#f9e29c);
+                color:black; border:none; border-radius:8px;
+                cursor:pointer; font-weight:bold; font-size:14px;">
+                💾 SALVAR ALTERAÇÕES
+            </button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
